@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from llama_cpp import Llama, LlamaGrammar
 
-MODEL_PATH = Path("models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf")
+MODEL_PATH = Path("models/Phi-3-mini-4k-instruct-q4.gguf")
 
 # ---------------------------
 # STRICT JSON GRAMMAR (GBNF)
