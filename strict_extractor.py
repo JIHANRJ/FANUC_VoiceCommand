@@ -11,13 +11,11 @@ MODEL_PATH = Path("models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf")
 JSON_GRAMMAR = r"""
 root ::= array
 
-array ::= "[" ws item (ws "," ws item)* ws "]"
+array ::= "[" ws item ws "]" | "[" ws item ws "," ws item ws "]" | "[" ws item ws "," ws item ws "," ws item ws "]" | "[" ws item ws "," ws item ws "," ws item ws "," ws item ws "]" | "[" ws item ws "," ws item ws "," ws item ws "," ws item ws "," ws item ws "]"
 
-item ::= "{" ws "\"name\"" ws ":" ws string ws "," ws "\"quantity\"" ws ":" ws number ws "}"
+item ::= "{" ws "\"name\"" ws ":" ws name ws "," ws "\"quantity\"" ws ":" ws number ws "}"
 
-string ::= "\"" characters "\""
-characters ::= character*
-character ::= [^"\\]
+name ::= "\"chocolate\"" | "\"nivea\"" | "\"lotion\"" | "\"vicks syrup\"" | "\"Appy juice\"" | "\"coca cola\"" | "\"soap\"" | "\"pringles\"" | "\"noodles\"" | "\"tea bags\"" | "\"ponds cream\"" | "\"dove soap\""
 
 number ::= digit+
 digit ::= [0-9]
