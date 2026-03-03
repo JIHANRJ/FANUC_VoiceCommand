@@ -1,0 +1,7 @@
+# torch>=2.0
+# transformers>=4.35.0
+# vosk>=0.3.44
+# sounddevice>=0.4.5
+llama-cpp-python==0.2.56
+huggingface_hub==0.22.2
+python-dotenv==1.0.1

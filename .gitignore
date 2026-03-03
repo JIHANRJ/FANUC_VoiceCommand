@@ -1,0 +1,59 @@
+# Virtual Environment
+VoiceComm/
+venv/
+env/
+.venv/
+ENV/
+.env
+
+# Large Model Files
+*.gguf
+*.bin
+*.safetensors
+*.pt
+*.pth
+vosk-model-small-en-us-0.15/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Testing
+.pytest_cache/
+.coverage
+.tox/
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Misc
+.cache/
+*.log
+.ipynb_checkpoints/
