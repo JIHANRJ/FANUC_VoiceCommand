@@ -60,25 +60,16 @@ def extract_raw(text):
 def parse_to_json(raw_output):
     items = []
 
-    lines = raw_output.split("\n")
+    # normalize
+    raw_output = raw_output.lower()
 
-    for line in lines:
-        line = line.strip().lower()
+    # find all product:quantity patterns anywhere in text
+    matches = re.findall(r'([a-z ]+)\s*:\s*(\d+)', raw_output)
 
-        if ":" not in line:
-            continue
-
-        product, qty = line.split(":", 1)
-
+    for product, qty in matches:
         product = product.strip()
-        qty = qty.strip()
-
-        if not qty.isdigit():
-            continue
-
         qty = int(qty)
 
-        # Catalog validation
         if product in CATALOG:
             items.append({
                 "name": product,

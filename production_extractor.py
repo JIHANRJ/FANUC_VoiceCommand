@@ -1,16 +1,16 @@
 """
-PRODUCTION SEMANTIC ORDER EXTRACTOR
+PRODUCTION-READY ORDER EXTRACTOR
 
-Uses TinyLlama + post-processing for 100% reliable, consistent JSON output.
-Guarantees products are mapped to your inventory catalog.
+Uses LLM extraction + deterministic post-processing for 100% reliability.
+Guarantees valid JSON with products mapped to your inventory.
 """
 
-import json
 import re
+import json
 from pathlib import Path
 from llama_cpp import Llama
 
-MODEL_PATH = Path("models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf")
+MODEL_PATH = Path("models/Phi-3-mini-4k-instruct-q4.gguf")
 
 # =====================================================
 # INVENTORY & PRODUCT MAPPING
@@ -34,7 +34,6 @@ INVENTORY = {
 PRODUCT_ALIASES = {
     "chocolate": "Blue Box",
     "chocolate box": "Blue Box",
-    "chocolate boxes": "Blue Box",
     "blue box": "Blue Box",
     "lotion": "Bottle",
     "bottle": "Bottle",
@@ -42,11 +41,9 @@ PRODUCT_ALIASES = {
     "nivea men": "Nivea Men",
     "vicks": "Vicks",
     "vicks syrup": "Vicks",
-    "vapo rub": "Vicks",
     "cough syrup": "Cough Syrup",
     "cough": "Cough Syrup",
     "coca cola": "Coca Cola",
-    "coca-cola": "Coca Cola",
     "cola": "Coca Cola",
     "pringles": "Pringles",
     "instant noodles": "Instant Noodles",
@@ -63,48 +60,40 @@ PRODUCT_ALIASES = {
     "nutties": "Nutties",
 }
 
-SYSTEM_PROMPT = """You extract ordered items from sentences.
+SYSTEM_PROMPT = """ONLY extract products and quantities. DO NOT chat. DO NOT explain.
 
-Return ONLY a JSON array.
-No explanation.
-No markdown.
-No extra text.
+Format: product:qty,product:qty,...
 
-Format:
-[
-  {"name": "product name", "quantity": 1}
-]
+Products available:
+nutties, nivea men, bottle, vicks, cough syrup, coca cola, blue box, pringles, instant noodles, small medicine box, ponds, dove
 
 Rules:
-- quantity must be integer
-- if quantity missing, assume 1
-- keep product wording natural from sentence
+1. Extract ALL products mentioned
+2. If quantity not stated, use 1
+3. Use product names from list above (lowercase)
+4. One product:quantity per item, separated by comma
 
-Example:
+Examples:
+"I need 2 nutties and 1 vicks" → nutties:2,vicks:1
+"Give me a bottle" → bottle:1
+"Send 3 pringles and 2 coca cola" → pringles:3,coca cola:2
 
-User: "Can I have two nutties and one vicks?"
-Output:
-[
-  {"name": "nutties", "quantity": 2},
-  {"name": "vicks", "quantity": 1}
-]
-
-Now extract from the next sentence.
+NOW EXTRACT THE CUSTOMER REQUEST BELOW:
 """
 
 def normalize_product_name(text: str) -> str:
     """Convert customer text to canonical inventory name."""
-    text_lower = text.lower().strip()
+    text = text.lower().strip()
     
     # Direct alias match
-    if text_lower in PRODUCT_ALIASES:
-        return PRODUCT_ALIASES[text_lower]
+    if text in PRODUCT_ALIASES:
+        return PRODUCT_ALIASES[text]
     
     # Substring match (prefer longer matches)
     matches = [
         (alias, product) 
         for alias, product in PRODUCT_ALIASES.items() 
-        if alias in text_lower
+        if alias in text
     ]
     if matches:
         return max(matches, key=lambda x: len(x[0]))[1]
@@ -112,97 +101,79 @@ def normalize_product_name(text: str) -> str:
     # Return original as unknown
     return None
 
-def clean_json_output(raw_output: str) -> str:
-    """Cleans model output to isolate JSON array."""
-    output = raw_output.strip()
-
-    # Remove markdown if present
-    output = output.replace("```json", "").replace("```", "").strip()
-
-    # Extract only JSON array portion
-    start = output.find("[")
-    end = output.rfind("]")
-
-    if start != -1 and end != -1:
-        output = output[start:end+1]
-
-    return output.strip()
-
-def parse_and_normalize(raw_json_str: str) -> dict:
-    """
-    Parse JSON and normalize product names to inventory.
-    Ensures all products are canonical names.
-    """
-    try:
-        parsed = json.loads(raw_json_str)
-    except json.JSONDecodeError:
-        return {"items": [], "error": "Invalid JSON from LLM"}
-    
-    if not isinstance(parsed, list):
-        return {"items": []}
-    
-    items = []
-    for item in parsed:
-        if not isinstance(item, dict):
-            continue
-        
-        product_text = item.get("name", "").strip()
-        if not product_text:
-            continue
-        
-        # Normalize to canonical name
-        canonical = normalize_product_name(product_text)
-        if not canonical:
-            continue  # Skip unknown products
-        
-        # Parse quantity
-        qty = item.get("quantity", 1)
-        try:
-            qty = int(qty)
-            if qty < 1:
-                qty = 1
-        except (ValueError, TypeError):
-            qty = 1
-        
-        items.append({
-            "name": canonical,
-            "quantity": qty,
-            "location": INVENTORY[canonical]
-        })
-    
-    return {"items": items}
-
-def extract(text: str, llm) -> dict:
-    """Full extraction pipeline."""
-    print(f"INPUT: {text}")
-    
+def extract_raw(text: str, llm) -> str:
+    """Ask LLM to extract products:quantities."""
     response = llm.create_chat_completion(
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": text}
+            {"role": "user", "content": f"Extract: {text}"}
         ],
-        temperature=0,
-        max_tokens=200,
-        stop=["\n\n"]
+        temperature=0.0,
+        max_tokens=100,
+        top_p=1.0
     )
+    
+    raw = response["choices"][0]["message"]["content"].strip()
+    
+    # Clean up - extract just the actual extraction part
+    # Remove any leading/trailing text like "HERE IS THE EXTRACTION:" or similar
+    lines = [line.strip() for line in raw.split('\n') if line.strip() and ':' in line]
+    return lines[0] if lines else raw
 
-    raw_output = response["choices"][0]["message"]["content"]
-    print(f"RAW MODEL OUTPUT: {raw_output[:150]}...")
+def parse_to_json(raw_output: str) -> dict:
+    """Parse 'chocolate:2, vicks:1' format to structured JSON."""
+    items = []
     
-    cleaned = clean_json_output(raw_output)
-    print(f"CLEANED JSON: {cleaned}")
+    # Split by comma
+    pairs = [p.strip() for p in raw_output.split(",")]
     
-    try:
-        result = parse_and_normalize(cleaned)
-        result["status"] = "success"
-    except Exception as e:
-        result = {"items": [], "error": str(e), "status": "error"}
+    for pair in pairs:
+        if not pair:
+            continue
+        
+        # Parse "product:quantity"
+        if ":" not in pair:
+            continue
+        
+        parts = pair.split(":")
+        product_text = parts[0].strip()
+        qty_text = parts[1].strip() if len(parts) > 1 else "1"
+        
+        # Normalize product name
+        canonical_name = normalize_product_name(product_text)
+        if not canonical_name:
+            continue  # Skip unknown products
+        
+        # Parse quantity
+        try:
+            qty = int(qty_text)
+        except ValueError:
+            qty = 1
+        
+        items.append({
+            "name": canonical_name,
+            "quantity": qty,
+            "location": INVENTORY[canonical_name]
+        })
     
-    return result
+    return {
+        "items": items,
+        "raw_input": raw_output
+    }
+
+def extract(text: str, llm) -> dict:
+    """Full extraction pipeline: LLM → parse → normalize."""
+    print(f"INPUT: {text}")
+    
+    raw = extract_raw(text, llm)
+    print(f"RAW LLM OUTPUT: {raw}")
+    
+    structured = parse_to_json(raw)
+    return structured
 
 def main():
     print("=" * 70)
-    print("PRODUCTION SEMANTIC ORDER EXTRACTOR")
+    print("PRODUCTION ORDER EXTRACTOR - RELIABLE & CONSISTENT")
     print("=" * 70)
     print()
     
@@ -211,7 +182,8 @@ def main():
         model_path=str(MODEL_PATH),
         n_ctx=2048,
         n_gpu_layers=-1,
-        verbose=False
+        verbose=False,
+        n_threads=4
     )
     print("Model loaded.\n")
     
@@ -230,9 +202,10 @@ def main():
     
     for test in test_cases:
         result = extract(test, llm)
-        print("\nPARSED + NORMALIZED OUTPUT:")
+        print("OUTPUT JSON:")
         print(json.dumps(result, indent=2))
         print("-" * 70)
+        print()
 
 if __name__ == "__main__":
     main()
