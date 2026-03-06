@@ -1,6 +1,6 @@
 # Ollama Granite 3.2 / Llama3.1 Order Extractor
 
-**✅ STATUS: Fully tested and working** 
+**STATUS: Fully tested and working** 
 
 **Local structured extraction with guaranteed JSON schema validation**
 
@@ -13,12 +13,12 @@ User: "I want two ponds cream and 3 pringles"
 ```
 
 ## Features
-✅ **100% local** - No external APIs, runs entirely on your Mac  
-✅ **Commercial license** - Apache 2.0 (Granite 3.2 + Ollama)  
-✅ **Schema validation** - JSON output guaranteed to match schema  
-✅ **Fast** - 5-10s per order on Metal acceleration (macOS)  
-✅ **Reliable** - Schema-enforced extraction with fallback quantity recovery  
-✅ **Tested** - End-to-end validation with 3+ sample orders ✓
+- **100% local** - No external APIs, runs entirely on your Mac  
+- **Commercial license** - Apache 2.0 (Granite 3.2 + Ollama)  
+- **Schema validation** - JSON output guaranteed to match schema  
+- **Fast** - 5-10s per order on Metal acceleration (macOS)  
+- **Reliable** - Schema-enforced extraction with fallback quantity recovery  
+- **Tested** - End-to-end validation with 3+ sample orders
 
 ## Quick Setup
 
@@ -40,16 +40,30 @@ python3 ollama_granite_extractor/interactive_order_chat.py
 Switch to `granite:3.2` when available by running `ollama pull granite:3.2`
 
 ## Files
+
 - **strict_json_extractor.py** - Core extraction with JSON schema validation
+- **__init__.py** - Package exports for cleaner imports
+
+Sample scripts are in `../sample_scripts/`:
 - **interactive_order_chat.py** - Interactive chat interface
-- **SETUP.md** - Detailed installation & troubleshooting guide
+- **simple_demo.py** - Quick demo script for reference
+
+Inventory config in `../config/`:
+- **inventory.json** - Product catalog and aliases
 
 ## Usage
 
 ### Run Interactive Chat
 ```bash
-python3 ollama_granite_extractor/interactive_order_chat.py
+python3 ../sample_scripts/interactive_order_chat.py
 ```
+
+### Run Demo Script
+```bash
+python3 ../sample_scripts/simple_demo.py
+```
+
+For more details, see `../sample_scripts/README.md`
 
 ### Use in Code
 ```python
@@ -67,7 +81,19 @@ print(result)
 # }
 ```
 
-### Use with Custom Inventory JSON (Modular)
+### Use with Custom Inventory (Modular)
+
+Using the default config:
+```python
+from ollama_granite_extractor import create_extractor
+
+extractor = create_extractor(inventory_path="config/inventory.json")
+extractor.load_model()
+result, raw = extractor.extract_order("I want two ponds cream and 3 pringles")
+print(result)
+```
+
+Or with inline JSON:
 ```python
 from ollama_granite_extractor import create_extractor
 

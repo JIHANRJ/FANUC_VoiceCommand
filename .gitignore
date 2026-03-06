@@ -12,7 +12,11 @@ ENV/
 *.safetensors
 *.pt
 *.pth
+models/
+model_downloads/
 vosk-model-small-en-us-0.15/
+google_flan_t5/
+
 
 # Python
 __pycache__/

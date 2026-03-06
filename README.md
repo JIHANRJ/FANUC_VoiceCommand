@@ -8,17 +8,20 @@ This repository currently supports two active extraction implementations:
 
 ```
 FANUC_VoiceCommand/
-├── inventory.json
+├── config/
+│   └── inventory.json
+├── sample_scripts/
+│   ├── simple_demo.py
+│   ├── interactive_order_chat.py
+│   └── README.md
 ├── google_flan_t5/
 │   ├── production_order_extractor.py
 │   └── interactive_order_chat.py
 ├── ollama_granite_extractor/
 │   ├── __init__.py
 │   ├── strict_json_extractor.py
-│   ├── interactive_order_chat.py
 │   ├── README.md
 │   └── SETUP.md
-├── model_downloads/
 ├── transcribe.py
 └── requirements.txt
 ```
@@ -29,7 +32,12 @@ FANUC_VoiceCommand/
 cd /Users/rakesh/Desktop/FANUC_2026/FANUC_VoiceCommand
 source VoiceComm/bin/activate
 ollama serve
-python3 ollama_granite_extractor/interactive_order_chat.py
+python3 sample_scripts/interactive_order_chat.py
+```
+
+Or run the simple demo:
+```bash
+python3 sample_scripts/simple_demo.py
 ```
 
 ## Programmatic Use (Modular)
@@ -37,7 +45,7 @@ python3 ollama_granite_extractor/interactive_order_chat.py
 ```python
 from ollama_granite_extractor import create_extractor
 
-extractor = create_extractor(inventory_path="inventory.json")
+extractor = create_extractor(inventory_path="config/inventory.json")
 extractor.load_model()
 result, raw = extractor.extract_order("I want two ponds cream and 3 pringles")
 print(result)
@@ -45,7 +53,7 @@ print(result)
 
 ## Inventory Contract
 
-The extractor expects this JSON shape:
+The extractor expects this JSON shape at `config/inventory.json`:
 
 ```json
 {

@@ -23,15 +23,27 @@ DEFAULT_API_TIMEOUT = 60  # seconds for inference
 # =====================================================
 # INVENTORY LOADING
 # =====================================================
-def _load_inventory_file(json_path: str = "../inventory.json") -> dict:
+def _load_inventory_file(json_path: str = "../config/inventory.json") -> dict:
     """Load inventory JSON payload from a file path."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     if os.path.isabs(json_path):
         full_path = json_path
-    elif os.path.exists(json_path):
-        full_path = json_path
     else:
-        full_path = os.path.join(script_dir, json_path)
+        workspace_root = os.path.dirname(script_dir)
+        candidates = [
+            os.path.abspath(json_path),
+            os.path.join(script_dir, json_path),
+            os.path.join(workspace_root, json_path),
+        ]
+
+        full_path = None
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                full_path = candidate
+                break
+
+        if full_path is None:
+            full_path = candidates[0]
 
     with open(full_path, "r") as file:
         return json.load(file)
@@ -68,7 +80,7 @@ class OrderExtractor:
         if inventory_json is not None:
             self.inventory, self.product_mapping = _parse_inventory_payload(inventory_json)
         else:
-            payload = _load_inventory_file(inventory_path or "../inventory.json")
+            payload = _load_inventory_file(inventory_path or "../config/inventory.json")
             self.inventory, self.product_mapping = _parse_inventory_payload(payload)
 
         self.ollama_api_url = ollama_api_url or DEFAULT_OLLAMA_API_URL
@@ -86,19 +98,20 @@ class OrderExtractor:
         except Exception:
             return False
 
-    def load_model(self):
+    def load_model(self, verbose: bool = True):
         """Verify Ollama is running and model is available (no explicit load needed)."""
         if not self.check_ollama_server():
             raise RuntimeError(
-                f"❌ Ollama server not running at {self.ollama_api_url}\n"
-                f"   Start it with: ollama serve\n"
-                f"   Pull model: ollama pull {self.model_name}"
+                f"Ollama server not running at {self.ollama_api_url}\n"
+                f"Start it with: ollama serve\n"
+                f"Pull model: ollama pull {self.model_name}"
             )
 
-        print(f"✅ Ollama server online at {self.ollama_api_url}")
-        print(f"📦 Model: {self.model_name}")
-        print(f"📋 Inventory loaded: {len(self.inventory)} products")
-        print("🏻‍💼 License: Apache 2.0 (commercial use OK)")
+        if verbose:
+            print(f"Ollama server online at {self.ollama_api_url}")
+            print(f"Model: {self.model_name}")
+            print(f"Inventory loaded: {len(self.inventory)} products")
+            print("License: Apache 2.0 (commercial use OK)")
 
         return None, None, "ollama"
 
@@ -218,9 +231,9 @@ RULES:
 USER ORDER: {order_text}
 
 EXAMPLES:
-- "I want two ponds cream" → {{"items": [{{"name": "Ponds Cream", "quantity": 2}}], "status": "success"}}
-- "Give me 3 cokes and 2 pringles" → {{"items": [{{"name": "Coca Cola", "quantity": 3}}, {{"name": "Pringles", "quantity": 2}}], "status": "success"}}
-- "Unknown item xyz" → {{"items": [], "status": "failed"}}
+- "I want two ponds cream" -> {{"items": [{{"name": "Ponds Cream", "quantity": 2}}], "status": "success"}}
+- "Give me 3 cokes and 2 pringles" -> {{"items": [{{"name": "Coca Cola", "quantity": 3}}, {{"name": "Pringles", "quantity": 2}}], "status": "success"}}
+- "Unknown item xyz" -> {{"items": [], "status": "failed"}}
 
 Now extract the order above and respond with ONLY valid JSON (no extra text):
 """
@@ -264,9 +277,9 @@ Now extract the order above and respond with ONLY valid JSON (no extra text):
 
         except requests.exceptions.ConnectionError:
             raise RuntimeError(
-                f"❌ Cannot connect to Ollama at {self.ollama_api_url}\n"
-                f"   Start server: ollama serve\n"
-                f"   Pull model: ollama pull {self.model_name}"
+                f"Cannot connect to Ollama at {self.ollama_api_url}\n"
+                f"Start server: ollama serve\n"
+                f"Pull model: ollama pull {self.model_name}"
             )
         except Exception as error:
             raise RuntimeError(f"Ollama API error: {error}")

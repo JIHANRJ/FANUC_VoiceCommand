@@ -3,14 +3,14 @@
 ## Overview
 This module uses **Ollama** (local LLM server) + **Granite 3.2** or **Llama3.1** (Apache 2.0 licensed) with **JSON Schema validation** for guaranteed structured order extraction.
 
-**✅ STATUS**: Fully tested with Llama3.1. Switch to Granite 3.2 when available.
+**STATUS**: Fully tested with Llama3.1. Switch to Granite 3.2 when available.
 
 ### Why This Approach?
-✅ **Local inference** - No external APIs, full privacy/control  
-✅ **Granite 3.2** - Instruction-tuned, enterprise-friendly, commercial license  
-✅ **JSON Schema validation** - Model output guaranteed to match schema (no regex hacks)  
-✅ **Fast on Mac** - Metal acceleration supports local 3B-8B models well  
-✅ **Tool-based extraction** - Model follows explicit slot/function definitions  
+- **Local inference** - No external APIs, full privacy/control  
+- **Granite 3.2** - Instruction-tuned, enterprise-friendly, commercial license  
+- **JSON Schema validation** - Model output guaranteed to match schema (no regex hacks)  
+- **Fast on Mac** - Metal acceleration supports local 3B-8B models well  
+- **Tool-based extraction** - Model follows explicit slot/function definitions  
 
 ---
 
@@ -151,7 +151,7 @@ OLLAMA_MODEL=llama3.1:latest OLLAMA_API_URL=http://127.0.0.1:11435 python3 ...
 ### Model Options
 | Model | Size | Latency | Accuracy | Recommendation |
 |-------|------|---------|----------|---|
-| `granite:3.2` | ~3B | Fast (5-10s) | Good | ✅ Default |
+| `granite:3.2` | ~3B | Fast (5-10s) | Good | [Default] |
 | `granite:8b` | ~8B | Medium (15-30s) | Better | For complex orders |
 | `mistral:7b` | ~7B | Medium | Excellent | If you want more power |
 
@@ -203,12 +203,12 @@ ollama list
 | Model Size | 250M | 7B | 3B (default) |
 | Latency | ~2s | 3-5min (CPU) | 5-10s (Metal) |
 | Accuracy | Medium | High | High |
-| JSON Reliability | Regex parsing | Schema coercion | Schema validation ✅ |
-| Local Private | ✅ | ✅ | ✅ |
-| Tool Support | ❌ | ❌ | ✅ (function defs) |
+| JSON Reliability | Regex parsing | Schema coercion | Schema validation [Yes] |
+| Local Private | Yes | Yes | Yes |
+| Tool Support | No | No | Yes (function defs) |
 | Setup | `pip install` | `pip install` | `ollama pull` |
-| Admin Rights | ❌ | ❌ | May need (for install) |
-| Recommended | Fast fallback | Don't use on CPU | ✅ **Default** |
+| Admin Rights | No | No | May need (for install) |
+| Recommended | Fast fallback | Don't use on CPU | **Default** |
 
 ---
 
