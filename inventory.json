@@ -1,0 +1,105 @@
+{
+  "inventory": {
+    "Chocolates": {
+      "rack": "Rack 1",
+      "section": "Section 1",
+      "position": "Position 1"
+    },
+    "Nivea Men": {
+      "rack": "Rack 1",
+      "section": "Section 1",
+      "position": "Position 2"
+    },
+    "lotion": {
+      "rack": "Rack 1",
+      "section": "Section 1",
+      "position": "Position 3"
+    },
+    "Vicks Cough Syrup": {
+      "rack": "Rack 1",
+      "section": "Section 2",
+      "position": "Position 1"
+    },
+    "Appy Fizz Juice": {
+      "rack": "Rack 1",
+      "section": "Section 2",
+      "position": "Position 2"
+    },
+    "Coca Cola": {
+      "rack": "Rack 1",
+      "section": "Section 2",
+      "position": "Position 3"
+    },
+    "Blue Tea Box": {
+      "rack": "Rack 2",
+      "section": "Section 1",
+      "position": "Position 1"
+    },
+    "Pringles": {
+      "rack": "Rack 2",
+      "section": "Section 1",
+      "position": "Position 2"
+    },
+    "Instant Noodles": {
+      "rack": "Rack 2",
+      "section": "Section 1",
+      "position": "Position 3"
+    },
+    "Soap": {
+      "rack": "Rack 2",
+      "section": "Section 2",
+      "position": "Position 1"
+    },
+    "Ponds Cream": {
+      "rack": "Rack 2",
+      "section": "Section 2",
+      "position": "Position 2"
+    },
+    "Dove Soap": {
+      "rack": "Rack 2",
+      "section": "Section 2",
+      "position": "Position 3"
+    }
+  },
+  "product_mappings": {
+    "nutties": "Chocolates",
+    "chocolate": "Chocolates",
+    "chocolates": "Chocolates",
+    "chocolate box": "Chocolates",
+    "chocolate boxes": "Chocolates",
+    "nivea men": "Nivea Men",
+    "nivea": "Nivea Men",
+    "bottle": "lotion",
+    "lotion": "lotion",
+    "vicks": "Vicks Cough Syrup",
+    "vicks syrup": "Vicks Cough Syrup",
+    "vicks cough syrup": "Vicks Cough Syrup",
+    "cough syrup": "Vicks Cough Syrup",
+    "cough": "Vicks Cough Syrup",
+    "syrup": "Vicks Cough Syrup",
+    "appy fizz": "Appy Fizz Juice",
+    "appy": "Appy Fizz Juice",
+    "fizz": "Appy Fizz Juice",
+    "juice": "Appy Fizz Juice",
+    "appy fizz juice": "Appy Fizz Juice",
+    "coca cola": "Coca Cola",
+    "coca-cola": "Coca Cola",
+    "cola": "Coca Cola",
+    "coke": "Coca Cola",
+    "blue box": "Blue Tea Box",
+    "blue tea box": "Blue Tea Box",
+    "tea box": "Blue Tea Box",
+    "pringles": "Pringles",
+    "pringle": "Pringles",
+    "chips": "Pringles",
+    "instant noodles": "Instant Noodles",
+    "noodles": "Instant Noodles",
+    "ramen": "Instant Noodles",
+    "soap": "Soap",
+    "ponds": "Ponds Cream",
+    "ponds cream": "Ponds Cream",
+    "pond": "Ponds Cream",
+    "dove": "Dove Soap",
+    "dove soap": "Dove Soap"
+  }
+}

@@ -9,20 +9,32 @@ Production-ready order extraction system using FLAN-T5 for natural language proc
 pip install -r requirements.txt
 ```
 
-### 2. Interactive Testing
-Test the extractor with live chat:
+### 2. Configure Your Inventory
+Edit `inventory.json` to match your products and warehouse locations:
 ```bash
+nano inventory.json  # or use any text editor
+```
+The JSON file contains:
+- **inventory**: Your products with warehouse locations
+- **product_mappings**: Aliases and synonyms for flexible customer language
+
+### 3. Run the System
+
+**Interactive Testing:**
+```bash
+cd google_flan_t5
 python3 interactive_order_chat.py
 ```
 
-Type your orders naturally:
-- `I need 2 chocolate boxes and 1 vicks`
-- `Give me 3 pringles and 2 colas`
-- `Send a bottle please`
-
-### 3. Batch Processing
-Use the production extractor for programmatic access:
+**Higher-accuracy model (Mistral + strict JSON):**
 ```bash
+cd mistral_strict_json
+../VoiceComm/bin/python3 interactive_order_chat.py
+```
+
+**Batch Processing:**
+```bash
+cd google_flan_t5
 python3 production_order_extractor.py
 ```
 
@@ -30,8 +42,15 @@ python3 production_order_extractor.py
 
 ```
 FANUC_VoiceCommand/
-├── production_order_extractor.py    # Main extraction engine
-├── interactive_order_chat.py        # Live testing interface
+├── inventory.json                   # Product catalog (EDIT THIS for your products)
+├── google_flan_t5/                  # FLAN-T5 implementation
+│   ├── production_order_extractor.py
+│   ├── interactive_order_chat.py
+│   └── README.md
+├── mistral_strict_json/             # Mistral-7B with strict JSON enforcement
+│   ├── strict_json_extractor.py
+│   ├── interactive_order_chat.py
+│   └── README.md
 ├── model_downloads/                 # Model download scripts
 │   ├── download_model_flan_T5.py
 │   ├── download_model_phi-2.py
@@ -48,6 +67,8 @@ FANUC_VoiceCommand/
 
 ## Features
 
+- **Modular Design** - External JSON configuration for easy customization
+- **Model Agnostic** - Organized folder structure supports multiple models
 - **100% Valid JSON Output** - Guaranteed structured results
 - **12/12 Test Cases Passed** - Consistent, reliable extraction
 - **Inventory Mapping** - Products mapped to warehouse locations
@@ -55,17 +76,36 @@ FANUC_VoiceCommand/
 - **Laptop-Friendly** - Efficient CPU/GPU execution
 - **Deterministic** - Same input = same output
 
-## Available Products
+## Customizing for Your Application
 
+### Edit `inventory.json`
+
+```json
+{
+   "inventory": {
+      "Your Product Name": {
+         "rack": "Rack 1",
+         "section": "Section A",
+         "position": "Position 1"
+      }
+   },
+   "product_mappings": {
+      "customer alias": "Your Product Name",
+      "synonym": "Your Product Name"
+   }
+}
 ```
-Nutties, Nivea Men, Bottle, Vicks, Cough Syrup, Coca Cola,
-Blue Box, Pringles, Instant Noodles, Small Medicine Box, Ponds, Dove
-```
+
+No code changes needed! The system automatically:
+1. Loads products from JSON
+2. Maps customer language using aliases
+3. Returns structured JSON with locations
 
 ## Usage Examples
 
 ### Interactive Chat
 ```bash
+$ cd google_flan_t5
 $ python3 interactive_order_chat.py
 Your order: I need 2 nutties and 1 vicks
 Extracted 2 item(s):
@@ -77,17 +117,12 @@ Extracted 2 item(s):
 
 ### Programmatic Usage
 ```python
+import sys
+sys.path.append('google_flan_t5')
 from production_order_extractor import extract_order
 import torch
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-MODEL_NAME = "google/flan-t5-base"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = model.to(device)
-
-result = extract_order("I need 2 chocolate boxes", model, tokenizer, device)
+result = extract_order("I need 2 chocolate boxes")
 print(result)
 ```
 
@@ -146,9 +181,20 @@ The system uses a three-stage pipeline:
    - Handles various output formats gracefully
 
 3. **Normalization**
-   - Maps customer language to canonical inventory names
+   - Maps customer language to canonical inventory names from JSON
    - Fuzzy matching for typos and variations
    - Deterministic results
+
+## Trying Different Models
+
+The `google_flan_t5/` folder structure allows you to easily test other models:
+
+1. Create a new folder (e.g., `phi-3/`, `mistral/`)
+2. Copy and modify the scripts for the new model
+3. Update `inventory.json` path if needed
+4. Compare results across models
+
+See `model_downloads/` for scripts to download alternative models.
 
 ## Tips for Best Results
 

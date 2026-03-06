@@ -17,66 +17,31 @@ APPROACH:
 
 import re
 import json
+import os
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 MODEL_NAME = "google/flan-t5-base"  # Apache 2.0 license, commercial use OK
 
 # =====================================================
-# INVENTORY DATABASE
+# LOAD INVENTORY FROM EXTERNAL JSON
 # =====================================================
-INVENTORY = {
-    "Nutties": {"rack": "Rack 1", "section": "Section 1", "position": "Position 1"},
-    "Nivea Men": {"rack": "Rack 1", "section": "Section 1", "position": "Position 2"},
-    "Bottle": {"rack": "Rack 1", "section": "Section 1", "position": "Position 3"},
-    "Vicks": {"rack": "Rack 1", "section": "Section 2", "position": "Position 1"},
-    "Cough Syrup": {"rack": "Rack 1", "section": "Section 2", "position": "Position 2"},
-    "Coca Cola": {"rack": "Rack 1", "section": "Section 2", "position": "Position 3"},
-    "Blue Box": {"rack": "Rack 2", "section": "Section 1", "position": "Position 1"},
-    "Pringles": {"rack": "Rack 2", "section": "Section 1", "position": "Position 2"},
-    "Instant Noodles": {"rack": "Rack 2", "section": "Section 1", "position": "Position 3"},
-    "Small Medicine Box": {"rack": "Rack 2", "section": "Section 2", "position": "Position 1"},
-    "Ponds": {"rack": "Rack 2", "section": "Section 2", "position": "Position 2"},
-    "Dove": {"rack": "Rack 2", "section": "Section 2", "position": "Position 3"},
-}
+def load_inventory(json_path: str = "../inventory.json") -> tuple:
+    """
+    Load inventory and product mappings from external JSON file.
+    Returns: (inventory_dict, product_mapping_dict)
+    """
+    # Get the directory of this script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    full_path = os.path.join(script_dir, json_path)
+    
+    with open(full_path, 'r') as f:
+        data = json.load(f)
+    
+    return data['inventory'], data['product_mappings']
 
-# Product name normalization - maps customer language to inventory names
-PRODUCT_MAPPING = {
-    # Exact matches (lowercase)
-    "nutties": "Nutties",
-    "nivea men": "Nivea Men",
-    "nivea": "Nivea Men",
-    "bottle": "Bottle",
-    "lotion": "Bottle",
-    "vicks": "Vicks",
-    "vicks syrup": "Vicks",
-    "cough syrup": "Cough Syrup",
-    "cough": "Cough Syrup",
-    "coca cola": "Coca Cola",
-    "coca-cola": "Coca Cola",
-    "cola": "Coca Cola",
-    "coke": "Coca Cola",
-    "blue box": "Blue Box",
-    "chocolate": "Blue Box",
-    "chocolate box": "Blue Box",
-    "chocolate boxes": "Blue Box",
-    "chocolates": "Blue Box",
-    "pringles": "Pringles",
-    "pringle": "Pringles",
-    "chips": "Pringles",
-    "instant noodles": "Instant Noodles",
-    "noodles": "Instant Noodles",
-    "ramen": "Instant Noodles",
-    "small medicine box": "Small Medicine Box",
-    "medicine box": "Small Medicine Box",
-    "medicine": "Small Medicine Box",
-    "ponds": "Ponds",
-    "ponds cream": "Ponds",
-    "pond": "Ponds",
-    "dove": "Dove",
-    "dove soap": "Dove",
-    "soap": "Dove",
-}
+# Load inventory at module level
+INVENTORY, PRODUCT_MAPPING = load_inventory()
 
 print("Loading FLAN-T5 model...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
@@ -86,7 +51,8 @@ model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
 model.eval()
-print(f"Model loaded on {device}.\n")
+print(f"Model loaded on {device}.")
+print(f"Inventory loaded: {len(INVENTORY)} products\n")
 
 # =====================================================
 # EXTRACTION PIPELINE
@@ -155,7 +121,62 @@ def normalize_product_name(product_text: str) -> str:
     
     return None  # Unknown product
 
-def parse_to_structured_json(raw_llm_output: str) -> dict:
+def extract_quantity_from_text(canonical_name: str, original_text: str) -> int:
+    """Recover quantity from original user text for a canonical product."""
+    if not original_text:
+        return 1
+
+    number_words = {
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
+    }
+
+    text = original_text.lower()
+    aliases = [k for k, v in PRODUCT_MAPPING.items() if v == canonical_name]
+    aliases.append(canonical_name.lower())
+    aliases = sorted(set(aliases), key=len, reverse=True)
+
+    for alias in aliases:
+        # e.g. "2 ponds cream" or "two ponds cream"
+        digit_before = re.search(rf'\b(\d+)\s+{re.escape(alias)}\b', text)
+        if digit_before:
+            return max(1, int(digit_before.group(1)))
+
+        word_before = re.search(
+            rf'\b({"|".join(number_words.keys())})\s+{re.escape(alias)}\b',
+            text
+        )
+        if word_before:
+            return number_words[word_before.group(1)]
+
+        # e.g. "ponds cream 2" or "ponds cream two"
+        digit_after = re.search(rf'\b{re.escape(alias)}\s+(\d+)\b', text)
+        if digit_after:
+            return max(1, int(digit_after.group(1)))
+
+        word_after = re.search(
+            rf'\b{re.escape(alias)}\s+({"|".join(number_words.keys())})\b',
+            text
+        )
+        if word_after:
+            return number_words[word_after.group(1)]
+
+    # fallback for phrases like "4 in quantity" when only one item is present
+    quantity_phrase = re.search(r'\b(\d+)\s+in\s+quantity\b', text)
+    if quantity_phrase:
+        return max(1, int(quantity_phrase.group(1)))
+
+    return 1
+
+def parse_to_structured_json(raw_llm_output: str, original_text: str = "") -> dict:
     """
     Parse LLM output like "chocolate:2, vicks:1" into structured JSON.
     Handles various output formats and guarantees valid JSON.
@@ -195,6 +216,9 @@ def parse_to_structured_json(raw_llm_output: str) -> dict:
                     qty = 1
             except:
                 qty = 1
+
+            if qty == 1 and original_text:
+                qty = extract_quantity_from_text(canonical_name, original_text)
             
             # Avoid duplicates
             if not any(item["name"] == canonical_name for item in items):
@@ -222,7 +246,7 @@ def extract_order(text: str) -> dict:
     print(f"LLM OUTPUT: {raw}")
     
     # Step 2: Parse and normalize
-    structured = parse_to_structured_json(raw)
+    structured = parse_to_structured_json(raw, text)
     
     return structured
 
