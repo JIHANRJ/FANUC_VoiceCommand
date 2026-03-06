@@ -41,3 +41,18 @@ The main configuration file that defines:
 4. No code changes needed—extractor reads config on startup
 
 All sample scripts automatically load from this location.
+
+## output_schema_order_capture.json
+
+JSON Schema file that defines the expected output structure for generic extraction.
+
+- Used by `sample_scripts/generic_schema_demo.py`
+- Can be duplicated/modified for other applications
+- Keeps structure definitions in config (not hardcoded in scripts)
+
+### To customize:
+
+1. Copy `output_schema_order_capture.json`
+2. Rename for your use case (for example: `output_schema_support_ticket.json`)
+3. Define your desired fields with JSON Schema
+4. Point your script/API call to that schema file

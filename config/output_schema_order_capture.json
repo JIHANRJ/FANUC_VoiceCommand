@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "intent": {
+      "type": "string"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "quantity"
+        ]
+      }
+    },
+    "confidence": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "intent",
+    "entities",
+    "status"
+  ]
+}
