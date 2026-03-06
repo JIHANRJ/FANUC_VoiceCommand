@@ -12,13 +12,15 @@ Usage from project root (after activating venv):
 import json
 import sys
 import os
+from typing import NoReturn
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ollama_granite_extractor import create_extractor
 
 
-def main():
+def main() -> None:
+    """Interactive order extraction chat interface."""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     workspace_root = os.path.dirname(script_dir)
     inventory_path = os.path.join(workspace_root, "config", "inventory.json")
@@ -47,7 +49,7 @@ def main():
                 break
 
             order_count += 1
-            result, raw = extractor.extract_order(user_input)
+            result, raw = extractor.extract_order(user_input) # JSON output 
             
             print(json.dumps(result, indent=2))
 

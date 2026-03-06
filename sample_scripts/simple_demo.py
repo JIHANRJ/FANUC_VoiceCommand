@@ -10,13 +10,14 @@ Usage:
 import sys
 import os
 import json
+from typing import List, Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ollama_granite_extractor import create_extractor
 
 
-def demo():
+def demo() -> None:
     """Quick demo of order extraction with default inventory."""
     
     # Get absolute path to inventory (works from any directory)
@@ -30,20 +31,20 @@ def demo():
     # Verify Ollama server is running
     try:
         extractor.load_model(verbose=False)
-    except RuntimeError as e:
-        error_output = {"error": str(e), "status": "failed"}
+    except RuntimeError as error:
+        error_output = {"error": str(error), "status": "failed"}
         print(json.dumps(error_output, indent=2))
         return
     
     # Example orders to process
-    test_orders = [
+    test_orders: List[str] = [
         "I want two ponds cream and 3 pringles",
         "Get me coca cola",
         "I need soap, instant noodles, and two vicks",
     ]
     
     # Process all orders and collect results
-    results = []
+    results: List[Dict[str, Any]] = []
     for order_text in test_orders:
         result, raw = extractor.extract_order(order_text)
         results.append({
@@ -54,7 +55,7 @@ def demo():
     # Output as JSON
     output = {
         "status": "success",
-        "model": "llama3.1:latest",
+        "model": extractor.model_name,
         "total_orders_processed": len(test_orders),
         "results": results
     }

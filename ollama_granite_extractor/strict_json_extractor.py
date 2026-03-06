@@ -332,6 +332,13 @@ Now extract the order above and respond with ONLY valid JSON (no extra text):
 
     def extract_order(self, order_text: str) -> tuple[dict, str]:
         """Main extraction entrypoint for reusable extractor instance."""
+        if not order_text or not order_text.strip():
+            return {
+                "items": [],
+                "status": "failed",
+                "total_items": 0,
+            }, ""
+        
         raw_json, raw = self.generate_json_with_schema(order_text)
         strict_result = self.coerce_to_strict_result(raw_json, order_text)
         return strict_result, raw
