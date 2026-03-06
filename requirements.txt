@@ -2,3 +2,4 @@ torch>=2.0
 transformers>=4.35.0
 vosk>=0.3.44
 sounddevice>=0.4.5
+requests>=2.31.0

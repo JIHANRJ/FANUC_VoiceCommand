@@ -53,7 +53,7 @@ python3 ollama_granite_extractor/interactive_order_chat.py
 
 ### Use in Code
 ```python
-from ollama_granite_extractor.strict_json_extractor import extract_order
+from ollama_granite_extractor import extract_order
 
 result, raw = extract_order("I want two ponds cream and 3 pringles")
 print(result)
@@ -67,13 +67,44 @@ print(result)
 # }
 ```
 
+### Use with Custom Inventory JSON (Modular)
+```python
+from ollama_granite_extractor import create_extractor
+
+inventory_json = {
+     "inventory": {
+          "Ponds Cream": {"rack": "R1", "section": "S1", "position": "P1"},
+          "Pringles": {"rack": "R1", "section": "S1", "position": "P2"}
+     },
+     "product_mappings": {
+          "ponds cream": "Ponds Cream",
+          "pringles": "Pringles"
+     }
+}
+
+extractor = create_extractor(inventory_json=inventory_json)
+result, raw = extractor.extract_order("I want two ponds cream and 3 pringles")
+print(result)
+```
+
+### One-shot API with Inventory JSON
+```python
+from ollama_granite_extractor import extract_order_with_inventory
+
+result, raw = extract_order_with_inventory(
+     "get me pringles",
+     inventory_json=inventory_json,
+)
+print(result)
+```
+
 ## Configuration
 ```bash
 # Use different model
 OLLAMA_MODEL=granite:8b python3 ollama_granite_extractor/interactive_order_chat.py
 
 # Custom Ollama server
-OLLAMA_API_URL=http://192.168.1.100:11434 python3 ...
+OLLAMA_API_URL=http://192.168.1.100:11435/api python3 ...
 ```
 
 ## System Requirements

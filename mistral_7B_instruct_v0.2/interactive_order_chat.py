@@ -1,22 +1,18 @@
 """
-INTERACTIVE CHAT FOR OLLAMA GRANITE 3.2 STRICT JSON EXTRACTOR
+INTERACTIVE CHAT FOR MISTRAL STRICT JSON EXTRACTOR
 """
 
 import json
-
-try:
-    from .strict_json_extractor import create_extractor
-except ImportError:
-    from strict_json_extractor import create_extractor
+from strict_json_extractor import load_model, extract_order, INVENTORY
 
 
-def print_banner(inventory: dict):
+def print_banner():
     print("\n" + "=" * 80)
-    print("OLLAMA GRANITE 3.2 STRICT JSON ORDER CHAT")
+    print("STRICT JSON ORDER CHAT")
     print("=" * 80)
-    print(f"\nAvailable Products ({len(inventory)} items):")
+    print(f"\nAvailable Products ({len(INVENTORY)} items):")
 
-    product_names = list(inventory.keys())
+    product_names = list(INVENTORY.keys())
     for index in range(0, len(product_names), 6):
         chunk = product_names[index:index + 6]
         print("   " + ", ".join(chunk))
@@ -29,11 +25,13 @@ def print_banner(inventory: dict):
 
 def print_result(result: dict, raw: str):
     print("\n" + "-" * 80)
+    print(f"Raw LLM: {raw}")
+    print("-" * 80)
 
     if result["total_items"] == 0:
-        print("⚠️  WARNING: No valid items extracted.")
+        print("WARNING: No valid items extracted.")
     else:
-        print(f"✅ SUCCESS: Extracted {result['total_items']} item(s):\n")
+        print(f"SUCCESS: Extracted {result['total_items']} item(s):\n")
         for idx, item in enumerate(result["items"], 1):
             loc = item["location"]
             print(f"   {idx}. {item['name']} x {item['quantity']}")
@@ -45,14 +43,8 @@ def print_result(result: dict, raw: str):
 
 
 def main():
-    extractor = create_extractor()
-    print_banner(extractor.inventory)
-    
-    try:
-        extractor.load_model()
-    except RuntimeError as error:
-        print(f"\n❌ Error: {error}")
-        return
+    print_banner()
+    tokenizer, model, device = load_model()
 
     print("\nReady! Type your order below:\n")
     order_count = 0
@@ -68,14 +60,14 @@ def main():
                 break
 
             order_count += 1
-            result, raw = extractor.extract_order(user_input)
+            result, raw = extract_order(user_input, tokenizer, model, device)
             print_result(result, raw)
 
         except KeyboardInterrupt:
             print(f"\n\nInterrupted. Processed {order_count} orders. Goodbye!")
             break
         except Exception as error:
-            print(f"\n❌ ERROR: {error}")
+            print(f"\nERROR: {error}")
             print("Please try again.\n")
 
 
