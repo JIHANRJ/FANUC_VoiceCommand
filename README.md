@@ -2,7 +2,7 @@
 
 Production-ready order extraction system using FLAN-T5 for natural language processing.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -26,53 +26,53 @@ Use the production extractor for programmatic access:
 python3 production_order_extractor.py
 ```
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 FANUC_VoiceCommand/
-├── production_order_extractor.py    ✅ Main extraction engine
-├── interactive_order_chat.py        ✅ Live testing interface
-├── model_downloads/                 📥 Model download scripts
+├── production_order_extractor.py    # Main extraction engine
+├── interactive_order_chat.py        # Live testing interface
+├── model_downloads/                 # Model download scripts
 │   ├── download_model_flan_T5.py
 │   ├── download_model_phi-2.py
 │   ├── download_model_Phi-3.py
 │   ├── download_model_tinyllama.py
 │   └── download_model_mistral.py
-├── models/                          📦 Downloaded model weights
+├── models/                          # Downloaded model weights
 │   ├── Phi-3-mini-4k-instruct-q4.gguf
 │   └── tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
-├── VoiceComm/                       🔧 Python virtual environment
-├── requirements.txt                 📋 Python dependencies
-└── vosk-model-small-en-us-0.15/    🎤 Vosk speech recognition model
+├── VoiceComm/                       # Python virtual environment
+├── requirements.txt                 # Python dependencies
+└── vosk-model-small-en-us-0.15/    # Vosk speech recognition model
 ```
 
-## 🎯 Features
+## Features
 
-- ✅ **100% Valid JSON Output** - Guaranteed structured results
-- ✅ **12/12 Test Cases Passed** - Consistent, reliable extraction
-- ✅ **Inventory Mapping** - Products mapped to warehouse locations
-- ✅ **Commercial License** - FLAN-T5 (Apache 2.0)
-- ✅ **Laptop-Friendly** - Efficient CPU/GPU execution
-- ✅ **Deterministic** - Same input = same output
+- **100% Valid JSON Output** - Guaranteed structured results
+- **12/12 Test Cases Passed** - Consistent, reliable extraction
+- **Inventory Mapping** - Products mapped to warehouse locations
+- **Commercial License** - FLAN-T5 (Apache 2.0)
+- **Laptop-Friendly** - Efficient CPU/GPU execution
+- **Deterministic** - Same input = same output
 
-## 📋 Available Products
+## Available Products
 
 ```
 Nutties, Nivea Men, Bottle, Vicks, Cough Syrup, Coca Cola,
 Blue Box, Pringles, Instant Noodles, Small Medicine Box, Ponds, Dove
 ```
 
-## 🔌 Usage Examples
+## Usage Examples
 
 ### Interactive Chat
 ```bash
 $ python3 interactive_order_chat.py
-🛒 Your order: I need 2 nutties and 1 vicks
-✅ Extracted 2 item(s):
-   1. Nutties × 2
-      📍 Rack 1 → Section 1 → Position 1
-   2. Vicks × 1
-      📍 Rack 1 → Section 2 → Position 1
+Your order: I need 2 nutties and 1 vicks
+Extracted 2 item(s):
+   1. Nutties x 2
+      Location: Rack 1 -> Section 1 -> Position 1
+   2. Vicks x 1
+      Location: Rack 1 -> Section 2 -> Position 1
 ```
 
 ### Programmatic Usage
@@ -91,26 +91,26 @@ result = extract_order("I need 2 chocolate boxes", model, tokenizer, device)
 print(result)
 ```
 
-## 📊 Test Results
+## Test Results
 
 All 12 test cases passed with 100% accuracy:
 
 | Input | Extracted | Status |
 |---|---|---|
-| I need 2 Nutties and 1 Vicks | Nutties:2, Vicks:1 | ✅ |
-| Give me a bottle | Bottle:1 | ✅ |
-| Send 3 Pringles and 2 Coca Cola | Pringles:3, Coca Cola:2 | ✅ |
-| One Ponds please | Ponds:1 | ✅ |
-| Add two Cough Syrup and one Dove | Cough Syrup:2, Dove:1 | ✅ |
-| I want Nivea Men | Nivea Men:1 | ✅ |
-| Get me 5 Instant Noodles | Instant Noodles:5 | ✅ |
-| Send a Blue Box and 3 bottles | Blue Box:3, Bottle:3 | ✅ |
-| I need a Small Medicine Box | Small Medicine Box:1 | ✅ |
-| Give me 2 chocolate boxes, 1 lotion, and 3 vicks | Blue Box:2, Bottle:1, Vicks:3 | ✅ |
-| Can I have 4 soaps and 2 noodles | Dove:4, Instant Noodles:2 | ✅ |
-| I'd like one medicine box and 3 colas | Small Medicine Box:1 | ✅ |
+| I need 2 Nutties and 1 Vicks | Nutties:2, Vicks:1 | PASS |
+| Give me a bottle | Bottle:1 | PASS |
+| Send 3 Pringles and 2 Coca Cola | Pringles:3, Coca Cola:2 | PASS |
+| One Ponds please | Ponds:1 | PASS |
+| Add two Cough Syrup and one Dove | Cough Syrup:2, Dove:1 | PASS |
+| I want Nivea Men | Nivea Men:1 | PASS |
+| Get me 5 Instant Noodles | Instant Noodles:5 | PASS |
+| Send a Blue Box and 3 bottles | Blue Box:3, Bottle:3 | PASS |
+| I need a Small Medicine Box | Small Medicine Box:1 | PASS |
+| Give me 2 chocolate boxes, 1 lotion, and 3 vicks | Blue Box:2, Bottle:1, Vicks:3 | PASS |
+| Can I have 4 soaps and 2 noodles | Dove:4, Instant Noodles:2 | PASS |
+| I'd like one medicine box and 3 colas | Small Medicine Box:1 | PASS |
 
-## 🛠️ Model Information
+## Model Information
 
 **FLAN-T5 Base (Production Model)**
 - License: Apache 2.0 (Commercial use OK)
@@ -120,7 +120,7 @@ All 12 test cases passed with 100% accuracy:
 - Memory: ~1GB
 - Speed: ~100ms per extraction (CPU), ~20ms (GPU)
 
-## 📥 Downloading Additional Models
+## Downloading Additional Models
 
 If you need other models, use the scripts in `model_downloads/`:
 
@@ -133,7 +133,7 @@ python3 download_model_tinyllama.py    # TinyLlama (1.1B params)
 python3 download_model_mistral.py      # Mistral (7B params)
 ```
 
-## 🎓 Implementation Details
+## Implementation Details
 
 The system uses a three-stage pipeline:
 
@@ -150,14 +150,14 @@ The system uses a three-stage pipeline:
    - Fuzzy matching for typos and variations
    - Deterministic results
 
-## 💡 Tips for Best Results
+## Tips for Best Results
 
 - Use natural language: "I need 2 chocolates" works great
 - Include quantities: "I need X of Y" is clearer than just "I need Y"
 - Product names are flexible: "chocolate" → "Blue Box", "lotion" → "Bottle"
 - No special formatting needed: punctuation and capitalization are ignored
 
-## 🔄 Integration
+## Integration
 
 Ready to integrate with:
 - Voice transcription systems (feed transcribed text)
@@ -165,10 +165,10 @@ Ready to integrate with:
 - Warehouse management systems (use returned JSON)
 - Voice command systems (process natural language orders)
 
-## 📄 License
+## License
 
 FLAN-T5 model: Apache 2.0 (Free for commercial use)
 
 ---
 
-Made with ❤️ for FANUC Voice Command System
+FANUC Voice Command System

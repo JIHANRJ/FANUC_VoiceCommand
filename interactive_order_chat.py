@@ -190,12 +190,12 @@ def extract_order(text: str, model, tokenizer, device) -> dict:
 def print_banner():
     """Print welcome banner."""
     print("\n" + "="*80)
-    print("🤖 INTERACTIVE ORDER EXTRACTION CHAT")
+    print("INTERACTIVE ORDER EXTRACTION CHAT")
     print("="*80)
-    print("\n📦 Available Products:")
+    print("\nAvailable Products:")
     print("   Nutties, Nivea Men, Bottle, Vicks, Cough Syrup, Coca Cola,")
     print("   Blue Box, Pringles, Instant Noodles, Small Medicine Box, Ponds, Dove")
-    print("\n💡 Tips:")
+    print("\nTips:")
     print("   - Speak naturally: 'I need 2 chocolate boxes and 1 vicks'")
     print("   - Type 'quit' or 'exit' to stop")
     print("   - Type 'help' to see this info again")
@@ -204,19 +204,19 @@ def print_banner():
 def print_result(result: dict, raw: str):
     """Pretty print extraction results."""
     print("\n" + "-"*80)
-    print(f"🤖 Raw LLM: {raw}")
+    print(f"Raw LLM: {raw}")
     print("-"*80)
     
     if result["total_items"] == 0:
-        print("⚠️  No items extracted. Please try rephrasing your order.")
+        print("WARNING: No items extracted. Please try rephrasing your order.")
     else:
-        print(f"✅ Extracted {result['total_items']} item(s):\n")
+        print(f"SUCCESS: Extracted {result['total_items']} item(s):\n")
         for i, item in enumerate(result["items"], 1):
             loc = item["location"]
-            print(f"   {i}. {item['name']} × {item['quantity']}")
-            print(f"      📍 {loc['rack']} → {loc['section']} → {loc['position']}")
+            print(f"   {i}. {item['name']} x {item['quantity']}")
+            print(f"      Location: {loc['rack']} -> {loc['section']} -> {loc['position']}")
     
-    print("\n📄 Full JSON:")
+    print("\nFull JSON:")
     print(json.dumps(result, indent=2))
     print("-"*80 + "\n")
 
@@ -225,7 +225,7 @@ def main():
     print_banner()
     
     # Load model once
-    print("⏳ Loading FLAN-T5 model... (this takes a moment)")
+    print("Loading FLAN-T5 model... (this takes a moment)")
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
     
@@ -233,7 +233,7 @@ def main():
     model = model.to(device)
     model.eval()
     
-    print(f"✅ Model loaded on {device.upper()}\n")
+    print(f"Model loaded on {device.upper()}\n")
     print("Ready! Type your order below:\n")
     
     order_count = 0
@@ -242,14 +242,14 @@ def main():
     while True:
         try:
             # Get user input
-            user_input = input("🛒 Your order: ").strip()
+            user_input = input("Your order: ").strip()
             
             # Handle special commands
             if not user_input:
                 continue
             
             if user_input.lower() in ['quit', 'exit', 'q']:
-                print(f"\n👋 Processed {order_count} orders. Goodbye!")
+                print(f"\nProcessed {order_count} orders. Goodbye!")
                 break
             
             if user_input.lower() in ['help', 'h', '?']:
@@ -262,10 +262,10 @@ def main():
             print_result(result, raw)
             
         except KeyboardInterrupt:
-            print(f"\n\n👋 Interrupted. Processed {order_count} orders. Goodbye!")
+            print(f"\n\nInterrupted. Processed {order_count} orders. Goodbye!")
             break
         except Exception as e:
-            print(f"\n❌ Error: {e}")
+            print(f"\nERROR: {e}")
             print("Please try again.\n")
 
 if __name__ == "__main__":

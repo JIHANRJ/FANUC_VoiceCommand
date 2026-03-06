@@ -215,11 +215,11 @@ def extract_order(text: str) -> dict:
     Complete extraction pipeline.
     Returns guaranteed valid JSON with inventory mapping.
     """
-    print(f"📥 INPUT: {text}")
+    print(f"INPUT: {text}")
     
     # Step 1: LLM extraction
     raw = extract_with_llm(text)
-    print(f"🤖 LLM OUTPUT: {raw}")
+    print(f"LLM OUTPUT: {raw}")
     
     # Step 2: Parse and normalize
     structured = parse_to_structured_json(raw)
@@ -257,20 +257,20 @@ def main():
     for test in test_cases:
         try:
             result = extract_order(test)
-            print("✅ OUTPUT JSON:")
+            print("OUTPUT JSON:")
             print(json.dumps(result, indent=2))
             
             if result["items"]:
                 success_count += 1
             
         except Exception as e:
-            print(f"❌ ERROR: {e}")
+            print(f"ERROR: {e}")
         
         print("-" * 80)
         print()
     
-    print(f"\n✅ Successfully extracted {success_count}/{len(test_cases)} orders")
-    print("\nREADY FOR PRODUCTION USE! 🚀")
+    print(f"\nSUCCESS: Extracted {success_count}/{len(test_cases)} orders")
+    print("\nREADY FOR PRODUCTION USE!")
 
 if __name__ == "__main__":
     main()
